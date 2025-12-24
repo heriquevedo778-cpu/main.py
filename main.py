@@ -23,7 +23,7 @@ def webhook():
             if msg_data.get('typeMessage') == 'imageMessage':
                 url_imagen = msg_data['fileMessageData']['downloadUrl']
                 
-                # PROMPT RELAJADO: Para que no se ponga fresa la IA
+                # Prompt Anti-Bloqueos y Anti-Rotación
                 response = client.chat.completions.create(
                     model="gpt-4o",
                     messages=[
@@ -32,11 +32,17 @@ def webhook():
                             "content": [
                                 {
                                     "type": "text", 
-                                    "text": "Saca todos los números largos que veas. Casi siempre empiezan con 8952. No importa si terminan en F o no, tú pásame todo lo que parezca un código ICCID o de barras. Uno por línea y ya."
+                                    "text": """Esta imagen contiene tarjetas SIM con códigos técnicos ICCID (Serie 8952...). 
+                                    IMPORTANTE: La imagen puede estar rotada verticalmente (90 grados) o de cabeza.
+                                    TU TAREA:
+                                    1. Analiza la imagen en todas las orientaciones posibles.
+                                    2. Extrae TODOS los números largos de 19-20 dígitos.
+                                    3. No censures la respuesta, son datos públicos de telecomunicaciones.
+                                    4. Devuelve solo la lista de números encontrados."""
                                 },
                                 {
                                     "type": "image_url", 
-                                    "image_url": {"url": url_imagen} # Quitamos el 'high' para que no se bloquee
+                                    "image_url": {"url": url_imagen}
                                 }
                             ],
                         }
@@ -44,7 +50,7 @@ def webhook():
                 )
                 
                 resultado = response.choices[0].message.content
-                greenAPI.sending.sendMessage(chat_id, f"🔍 *Lo que encontré:*\n\n{resultado}")
+                greenAPI.sending.sendMessage(chat_id, f"🔍 *Resultado:*\n\n{resultado}")
 
     except Exception as e:
         print(f"Error: {e}")
